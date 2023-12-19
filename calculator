@@ -1,11 +1,15 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import tkinter as tk
+
+
 
 # Создание начальной таблицы
 df = {"Дата":["2023-11-01","2023-11-02","2023-11-03"],
       "Доходы":[500,600,0],
       "Расходы":[2000,700,300]}
-#Определение бюджетов на месяц,неделю
+
+#Определение бюджета на месяц,неделю
 month = int(input("Введите ваш бюджет на месяц = "))
 week = int(input("Введите ваш бюджет на неделю = "))
 
@@ -19,16 +23,55 @@ a = ['Продукты', 'Медицина', 'Транспорт', 'Развле
 df['Категория'] = a
 
 
-
-
-#Добавление столбцов с расходами, доходами
+#1.Добавление строк с расходами, доходами с помощью кода
 #df.loc[len(df.index)] = ['Дата', Доход, Расход,"Категория"]
 
-df.loc[len(df.index)] = ['2023-11-05', 0, 800,"Развлечения"]
+df.loc[len(df.index)] = ['2023-11-05', 0, 800,"Дом"]
 df.loc[len(df.index)] = ['2023-11-06', 500, 600,"Кафе"]
 df.loc[len(df.index)] = ['2023-11-07', 500, 600,"Подарки"]
 df.loc[len(df.index)] = ['2023-11-08', 500, 300,"Подписка"]
 df.loc[len(df.index)] = ['2023-11-09', 500, 800,"Спорт"]
+
+
+#2.Добавление расходов, доходов с помощью окна tkinter
+def add_values():
+    date = entry_date.get()
+    expense = entry_expense.get()
+    income = entry_income.get()
+    category = entry_category.get()
+    
+    new_row = {'Дата': date,
+               'Доходы': income,
+               'Расходы': expense,
+               'Категория': category}
+
+window = tk.Tk()
+
+
+label_date = tk.Label(window, text='Дата')
+entry_date = tk.Entry(window)
+label_date.pack()
+entry_date.pack()
+
+label_income = tk.Label(window, text='Доходы')
+entry_income = tk.Entry(window)
+label_income.pack()
+entry_income.pack()
+
+label_expense = tk.Label(window, text='Расходы')
+entry_expense = tk.Entry(window)
+label_expense.pack()
+entry_expense.pack()
+
+label_category = tk.Label(window, text='Категория')
+entry_category = tk.Entry(window)
+label_category.pack()
+entry_category.pack()
+
+button_add = tk.Button(window, text='Добавить', command=add_values)
+button_add.pack()
+
+window.mainloop()
 
 
 
@@ -36,35 +79,51 @@ df.loc[len(df.index)] = ['2023-11-09', 500, 800,"Спорт"]
 h = df['Расходы']. sum ()
 print("Расходы за внесённый период = ",h)
 
+df['Дата'] = pd.to_datetime(df['Дата'])
+
 # Создание столбца, который будет показывать остаток на месяц
 df['Ост. месяц'] = month - df['Расходы'].cumsum()
-
+df.loc[len(df.index)] = ['2023-11-10', 150, 450,"Такси"]
 #Создание столбца, который будет показывать остаток на неделю и будет обнулятся каждые 7 дней
-df['Расх неделю'] = df['Расходы'].groupby(df.index // 7).cumsum()
-df['Ост. неделя'] = week - df['Расх неделю']
+df['Расх за неделю'] = df['Расходы'].groupby(df.index // 7).cumsum()
+df['Ост. неделя'] = week - df['Расх за неделю']
 
 #Изменение порядка столбцов в таблице
-data = df.reindex(columns=['Дата','Ост. месяц','Ост. неделя','Расх неделю' ,'Расходы','Категория','Доходы'])
-
-#Круговая диаграмма расходов по категориям
-%matplotlib inline
-plt.pie(df['Расходы'], labels=df['Категория'], autopct='%1.1f%%')
-plt.axis('equal')
-plt.title('Расходы по категориям')
-plt.show()
-
+data = df.reindex(columns=['Дата','Ост. месяц','Ост. неделя','Расх за неделю' ,'Расходы','Категория','Доходы'])
 
 #Возможность вывести сумму расходов за определённый период
 df['Дата'] = pd.to_datetime(df['Дата'])
 start = pd.to_datetime('2023-11-01')
-end = pd.to_datetime('2023-11-04')
+end = pd.to_datetime('2023-11-06')
 sort_df = df[(df['Дата'] >= start) & (df['Дата'] <= end)]
 summa = sort_df['Расходы'].sum()
 print(f"Сумма расходов за выбранный период =  {summa}")
 
 
-# Записываем данные в CSV файл
-data.to_csv('финансы.csv', index=False)
+#Круговая диаграмма расходов по категориям
+%matplotlib inline
+plt.pie(df['Расходы'], labels=df['Категория'],autopct = '%1.1f%%', startangle=1)
+plt.axis('equal')
+plt.title('Расходы по категориям')
+plt.show()
+
+
+
+
+#Добавление расходов, доходов
+def add_values():
+    date = entry_date.get()
+    expense = entry_expense.get()
+    income = entry_income.get()
+    category = entry_category.get()
+    
+    new_row = {'Дата': date,
+               'Расходы': expense,
+               'Доходы': income,
+               'Категория': category}
 
 # Выводим таблицу
 print(data)
+
+# Записываем данные в CSV файл
+data.to_csv('финансы.csv', index=False)
